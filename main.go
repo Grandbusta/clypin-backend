@@ -36,18 +36,23 @@ func watcher() {
 	fmt.Println(env[0], env[1])
 	changed := clipboard.Watch(context.Background(), clipboard.FmtText)
 	for data := range changed {
+
 		println(string(data))
 		if ent, ok := sockets["123"]; ok {
 			ent.msgs = append(sockets["123"].msgs, string(data))
 			sockets["123"] = ent
-		}
-		curr := sockets["123"]
-		msg := curr.msgs[len(curr.msgs)-1]
-		for _, soc := range curr.conn {
-			err := soc.WriteJSON(map[string]string{"msg": msg})
-			if err != nil {
-				// log.Println("write:", err)
-				break
+			curr := sockets["123"]
+			var (
+				msg string
+				err error
+			)
+			msg = curr.msgs[len(curr.msgs)-1]
+			for _, soc := range curr.conn {
+				err = soc.WriteJSON(map[string]string{"msg": msg})
+				if err != nil {
+					// log.Println("write:", err)
+					break
+				}
 			}
 		}
 	}
@@ -98,7 +103,7 @@ func main() {
 			fmt.Println(curr.msgs)
 			msgd := curr.msgs[len(curr.msgs)-1]
 			for _, soc := range curr.conn {
-				err := soc.WriteJSON(map[string]string{"msg": msgd})
+				err = soc.WriteJSON(map[string]string{"msg": msgd})
 				if err != nil {
 					// log.Println("write:", err)
 					break
