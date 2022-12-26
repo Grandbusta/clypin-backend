@@ -1,24 +1,12 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
-	"os"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
-	"golang.design/x/clipboard"
 )
-
-func init() {
-	err := clipboard.Init()
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("Clypin running...")
-}
 
 var wc []*websocket.Conn
 
@@ -28,35 +16,6 @@ type socket struct {
 }
 
 var sockets = make(map[string]socket, 0)
-
-func watcher() {
-	_, cancel := context.WithTimeout(context.Background(), time.Second*2)
-	defer cancel()
-	env := os.Environ()
-	fmt.Println(env[0], env[1])
-	changed := clipboard.Watch(context.Background(), clipboard.FmtText)
-	for data := range changed {
-
-		println(string(data))
-		if ent, ok := sockets["123"]; ok {
-			ent.msgs = append(sockets["123"].msgs, string(data))
-			sockets["123"] = ent
-			curr := sockets["123"]
-			var (
-				msg string
-				err error
-			)
-			msg = curr.msgs[len(curr.msgs)-1]
-			for _, soc := range curr.conn {
-				err = soc.WriteJSON(map[string]string{"msg": msg})
-				if err != nil {
-					// log.Println("write:", err)
-					break
-				}
-			}
-		}
-	}
-}
 
 func main() {
 	app := fiber.New()
@@ -83,7 +42,6 @@ func main() {
 				conn: []*websocket.Conn{c},
 				msgs: []string{},
 			}
-
 		}
 		var (
 			msg []byte
@@ -115,6 +73,5 @@ func main() {
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World 👋!")
 	})
-	go watcher()
 	app.Listen(":3000")
 }
