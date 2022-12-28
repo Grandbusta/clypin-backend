@@ -10,9 +10,13 @@ import (
 
 var wc []*websocket.Conn
 
+type Data struct {
+	Msg    string `json:"msg"`
+	Source string `json:"source"`
+}
 type socket struct {
-	conn []*websocket.Conn
-	msgs []string
+	Conn  []*websocket.Conn
+	Datas []Data
 }
 
 var sockets = make(map[string]socket, 0)
@@ -28,42 +32,43 @@ func main() {
 		}
 		return fiber.ErrUpgradeRequired
 	})
-	app.Get("/ws/send/:id", websocket.New(func(c *websocket.Conn) {
+	app.Get("/ws/send/:user_id", websocket.New(func(c *websocket.Conn) {
 		// c.Locals is added to the *websocket.Conn
 		log.Println(c.Locals("allowed")) // true
-		log.Println(c.Params("id"))      // 123
+		user_id := c.Params("user_id")   // 123
 		log.Println(c.Query("v"))
-		if ent, ok := sockets["123"]; ok {
-			ent.conn = append(sockets["123"].conn, c)
-			ent.msgs = append(ent.msgs)
-			sockets["123"] = ent
+		if ent, ok := sockets[user_id]; ok {
+			ent.Conn = append(sockets[user_id].Conn, c)
+			sockets[user_id] = ent
 		} else {
-			sockets["123"] = socket{
-				conn: []*websocket.Conn{c},
-				msgs: []string{},
+			sockets[user_id] = socket{
+				Conn:  []*websocket.Conn{c},
+				Datas: []Data{},
 			}
 		}
 		var (
-			msg []byte
-			err error
+			data Data
+			err  error
 		)
 		for {
-			if _, msg, err = c.ReadMessage(); err != nil {
+
+			if err = c.ReadJSON(&data); err != nil {
 				log.Println("read:", err)
 				break
 			}
-			log.Printf("recv: %s", msg)
-			if ent, ok := sockets["123"]; ok {
-				ent.msgs = append(sockets["123"].msgs, string(msg))
-				sockets["123"] = ent
+
+			log.Printf("recv: %s", data)
+			if ent, ok := sockets[user_id]; ok {
+				ent.Datas = append(sockets[user_id].Datas, data)
+				sockets[user_id] = ent
 			}
-			curr := sockets["123"]
-			fmt.Println(curr.msgs)
-			msgd := curr.msgs[len(curr.msgs)-1]
-			for _, soc := range curr.conn {
-				err = soc.WriteJSON(map[string]string{"msg": msgd})
+			curr := sockets[user_id]
+			fmt.Println(curr.Datas)
+			msgd := curr.Datas[len(curr.Datas)-1]
+			for _, soc := range curr.Conn {
+				err = soc.WriteJSON(msgd)
 				if err != nil {
-					// log.Println("write:", err)
+					log.Println("write:", err)
 					break
 				}
 			}
