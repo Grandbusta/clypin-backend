@@ -1,6 +1,7 @@
 package server
 
 import (
+	"clypin/models"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -13,18 +14,6 @@ type Server struct {
 	DB     *gorm.DB
 }
 
-// func (server *Server) initializeRoutes() {
-// 	app := server.Router
-
-// 	// http
-// 	app.Get("/user/create", http.CreateUser())
-
-// 	// websocket
-// 	app.Use("/ws", middlewares.RequestedUpgrade())
-// 	app.Get("/ws/send/:user_id", websocket.New(ws.Ws()))
-
-// }
-
 func App() (app *Server) {
 	dsn := "host=localhost user=busta password=busta dbname=clypin port=5432"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -32,6 +21,13 @@ func App() (app *Server) {
 		panic(err.Error())
 	}
 	log.Println("DB connected successfully")
+
+	// Automigrate
+	db.AutoMigrate(
+		&models.User{},
+		&models.Message{},
+	)
+
 	server := &Server{
 		Router: fiber.New(),
 		DB:     db,
