@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type User struct {
 	ID        uint64    `gorm:"primaryKey;autoIncrement" json:"id"`
@@ -13,6 +15,14 @@ type User struct {
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
 
-func (u *User) Create() {
+func (u *User) Create() User {
+	user := User{
+		Email:     "bustajay30@gmail.com",
+		FirstName: "Bolu",
+		LastName:  "Busta",
+		Password:  "Mil",
+	}
+	// db.Create(&user)
+	return user
 
 }
