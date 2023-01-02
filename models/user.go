@@ -1,10 +1,7 @@
 package models
 
 import (
-	"fmt"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type User struct {
@@ -16,13 +13,4 @@ type User struct {
 	Messages  []Message `json:"messages"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
-}
-
-var db *gorm.DB
-
-func Create(user User) *User {
-
-	db.Create(&user)
-	fmt.Println(user)
-	return &user
 }

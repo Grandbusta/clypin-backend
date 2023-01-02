@@ -2,6 +2,7 @@ package http
 
 import (
 	"clypin/models"
+	"clypin/queries"
 	"fmt"
 	"log"
 
@@ -17,7 +18,7 @@ func CreateUser() func(c *fiber.Ctx) error {
 			Password:  "Mil",
 		}
 
-		fmt.Println(models.Create(user))
+		fmt.Println(queries.Create(&user))
 
 		log.Println("Getting to create user")
 		return c.SendString("Hello, World 👋!")
