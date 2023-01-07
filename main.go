@@ -28,6 +28,7 @@ func handleRequests() {
 	// User Routes
 	user := app.Group("/user")
 	user.Post("/create", http.CreateUser)
+	user.Post("/login", http.LoginUser)
 
 	// websocket
 	app.Use("/ws", middlewares.RequestedUpgrade())

@@ -14,7 +14,7 @@ func Create(user *models.User) *models.User {
 func FindByEmail(email string) (*models.User, error) {
 	db := config.DB
 	user := models.User{}
-	err := db.Model(&models.User{}).First(&user, email).Error
+	err := db.Model(&models.User{}).First(&user, models.User{Email: email}).Error
 	if err != nil {
 		return &user, err
 	}
