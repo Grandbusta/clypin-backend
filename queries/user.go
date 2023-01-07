@@ -10,3 +10,13 @@ func Create(user *models.User) *models.User {
 	db.Create(&user)
 	return user
 }
+
+func FindByEmail(email string) (*models.User, error) {
+	db := config.DB
+	user := models.User{}
+	err := db.Model(&models.User{}).First(&user, email).Error
+	if err != nil {
+		return &user, err
+	}
+	return &user, nil
+}
