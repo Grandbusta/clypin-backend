@@ -47,5 +47,6 @@ func LoginUser(c *fiber.Ctx) error {
 	if err != nil {
 		panic(err.Error())
 	}
+
 	return utils.RespondWithJson(c, fiber.StatusOK, res)
 }
