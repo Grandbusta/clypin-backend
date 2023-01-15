@@ -5,10 +5,13 @@ import (
 	"clypin/models"
 )
 
-func Create(user *models.User) *models.User {
+func Create(user *models.User) (*models.User, error) {
 	db := config.DB
-	db.Create(&user)
-	return user
+	err := db.Create(&user).Error
+	if err != nil {
+		return user, err
+	}
+	return user, err
 }
 
 func FindByEmail(email string) (*models.User, error) {

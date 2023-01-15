@@ -32,9 +32,18 @@ func CreateUser(c *fiber.Ctx) error {
 		Password:  input.Password,
 	}
 
-	new_user := queries.Create(&user)
+	new_user, err := queries.Create(&user)
+	if err != nil {
+		return utils.RespondWIthError(c,
+			fiber.StatusInternalServerError,
+			"An error occured",
+		)
+	}
 
-	return utils.RespondWithJson(c, fiber.StatusCreated, fiber.Map{"data": new_user})
+	return utils.RespondWithJson(c,
+		fiber.StatusCreated,
+		fiber.Map{"data": new_user},
+	)
 }
 
 func LoginUser(c *fiber.Ctx) error {
