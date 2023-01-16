@@ -4,8 +4,10 @@ import (
 	"clypin/models"
 	"clypin/queries"
 	"clypin/utils"
+	"errors"
 
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 type CreateUserInput struct {
@@ -32,7 +34,12 @@ func CreateUser(c *fiber.Ctx) error {
 		Password:  input.Password,
 	}
 
-	new_user, err := queries.Create(&user)
+	_, err = queries.FindUserByEmail(input.Email)
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return utils.RespondWIthError(c, fiber.ErrConflict.Code, "user already registered")
+	}
+
+	new_user, err := queries.CreateUser(&user)
 	if err != nil {
 		return utils.RespondWIthError(c,
 			fiber.StatusInternalServerError,
@@ -52,7 +59,7 @@ func LoginUser(c *fiber.Ctx) error {
 	if err != nil {
 		return utils.RespondWIthError(c, fiber.StatusBadRequest, err.Error())
 	}
-	res, err := queries.FindByEmail(input.Email)
+	res, err := queries.FindUserByEmail(input.Email)
 	if err != nil {
 		panic(err.Error())
 	}
